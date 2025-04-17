@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameBox 🎮</title>
+  <link rel="stylesheet" href="stylescss">
+  <style>
+  
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #1e1e1e;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      background-color: darkblue;
+    }
+
+    h1 {
+      margin: 20px 0;
+      font-size: 36px;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 800px;
+      margin-top: 30px;
+    }
+
+    .game-card {
+      background: cyan;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      transition: 0.3s;
+      cursor: pointer;
+      
+    }
+
+    .game-card:hover {
+      background: blue;
+      transform: scale(1.05);
+    }
+
+    .game-card a {
+      text-decoration: none;
+      color: black;
+      font-size: 18px;
+      display: block;
+    }
+    a {
+    font-family: "MedievalSharp", cursive;
+    font-weight: 400;
+    font-style: normal;
+}
+  </style>
+</head>
+
+<body>
+
+  <h1>🎮 GameBox</h1>
+  <div class="game-grid">
+    <div class="game-card">
+      <a href="games/catch_falling_objects.html">Catch the falling objects</a>
+    </div>
+    <div class="game-card">
+      <a href="games/tictactoe.html">Tic tac toe</a>
+    </div>
+    <div class="game-card">
+      <a href="games/tetris.html">Tetris</a>
+    </div>
+    <div class="game-card">
+      <a href="games/breakout.html">Breakout</a>
+    </div>
+    <div class="game-card">
+      <a href="games/pong.html">Ping-Pong</a>
+    </div>
+    <div class="game-card">
+      <a href="games/avoid-the-blocks.html">Avoid the blocks</a>
+    </div>
+    <div class="game-card">
+      <a href="games/slide-puzzle.html">Slide puzzle</a>
+    </div>
+    <div class="game-card">
+      <a href="games/minesweeper.html">Minesweeper</a>
+    </div>
+    <div class="game-card">
+      <a href="games/flappy.html">Flappy Bird</a>
+    </div>
+    <div class="game-card">
+      <a href="games/aim.html">Aim Trainer</a>
+    </div>
+    <div class="game-card">
+      <a href="games/memory.html">Memory Flip</a>
+    </div>
+    <div class="game-card">
+      <a href="games/snake.html">Snake Game</a>
+    </div>
+  </div>
+</body>
+
+</html>

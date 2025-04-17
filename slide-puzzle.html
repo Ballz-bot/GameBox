@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Slide Puzzle - GameBox</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #puzzle {
+      display: grid;
+      grid-template-columns: repeat(4, 80px);
+      grid-template-rows: repeat(4, 80px);
+      gap: 5px;
+    }
+
+    .tile {
+      background: #3498db;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .tile:hover {
+      background: #2980b9;
+    }
+
+    .empty {
+      background: #111;
+      cursor: default;
+    }
+
+    #win {
+      margin-top: 20px;
+      font-size: 20px;
+      color: #0f0;
+    }
+
+    .back-btn {
+      margin-top: 30px;
+      background: #444;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: #222;
+    }
+  </style>
+</head>
+<body>
+  <h1>Slide Puzzle</h1>
+  <div id="puzzle"></div>
+  <div id="win"></div>
+  <button class="back-btn" onclick="location.href='../index.html'">⬅ Back to GameBox</button>
+
+  <script>
+    const puzzle = document.getElementById("puzzle");
+    const winMessage = document.getElementById("win");
+
+    let grid = [];
+    let size = 4;
+    let emptyRow = size - 1;
+    let emptyCol = size - 1;
+
+    function initGrid() {
+      let nums = [...Array(size * size - 1).keys()].map(x => x + 1);
+      shuffle(nums);
+      nums.push(null); // empty slot
+
+      grid = [];
+      for (let r = 0; r < size; r++) {
+        grid[r] = [];
+        for (let c = 0; c < size; c++) {
+          let value = nums[r * size + c];
+          grid[r][c] = value;
+        }
+      }
+
+      render();
+    }
+
+    function render() {
+      puzzle.innerHTML = "";
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const value = grid[r][c];
+          const tile = document.createElement("div");
+          tile.classList.add("tile");
+          if (value === null) {
+            tile.classList.add("empty");
+          } else {
+            tile.textContent = value;
+            tile.addEventListener("click", () => tryMove(r, c));
+          }
+          puzzle.appendChild(tile);
+        }
+      }
+    }
+
+    function tryMove(r, c) {
+      const dr = Math.abs(r - emptyRow);
+      const dc = Math.abs(c - emptyCol);
+      if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
+        // valid move
+        grid[emptyRow][emptyCol] = grid[r][c];
+        grid[r][c] = null;
+        emptyRow = r;
+        emptyCol = c;
+        render();
+        checkWin();
+      }
+    }
+
+    function checkWin() {
+      let n = 1;
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          if (r === size - 1 && c === size - 1) {
+            if (grid[r][c] !== null) return false;
+          } else if (grid[r][c] !== n) {
+            return false;
+          }
+          n++;
+        }
+      }
+      winMessage.textContent = "🎉 You solved the puzzle!";
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    initGrid();
+  </script>
+</body>
+</html>

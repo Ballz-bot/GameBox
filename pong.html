@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pong - GameBox</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #111;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #gameCanvas {
+      border: 2px solid white;
+      background-color: #222;
+    }
+
+    .back-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: #222;
+    }
+
+    #score {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pong</h1>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
+  <div id="score">Player: 0 | AI: 0</div>
+  <button class="back-btn" onclick="location.href='../index.html'">⬅ Back to GameBox</button>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const paddleWidth = 10;
+    const paddleHeight = 80;
+    const ballSize = 10;
+
+    let playerY = canvas.height / 2 - paddleHeight / 2;
+    let aiY = canvas.height / 2 - paddleHeight / 2;
+    let ballX = canvas.width / 2;
+    let ballY = canvas.height / 2;
+    let ballSpeedX = 5;
+    let ballSpeedY = 4;
+    let playerScore = 0;
+    let aiScore = 0;
+
+    const paddleSpeed = 8;
+    let upPressed = false;
+    let downPressed = false;
+
+    // Draw paddles and ball
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw player paddle
+      ctx.fillStyle = 'lime';
+      ctx.fillRect(10, playerY, paddleWidth, paddleHeight);
+
+      // Draw AI paddle
+      ctx.fillStyle = 'red';
+      ctx.fillRect(canvas.width - 20, aiY, paddleWidth, paddleHeight);
+
+      // Draw ball
+      ctx.fillStyle = 'white';
+      ctx.fillRect(ballX, ballY, ballSize, ballSize);
+
+      // Draw score
+      ctx.font = '24px Arial';
+      ctx.fillStyle = 'white';
+      ctx.fillText(`Player: ${playerScore} | AI: ${aiScore}`, canvas.width / 2 - 80, 30);
+    }
+
+    // Update ball position and check for collisions
+    function updateBall() {
+      ballX += ballSpeedX;
+      ballY += ballSpeedY;
+
+      // Ball bouncing off top and bottom
+      if (ballY <= 0 || ballY + ballSize >= canvas.height) {
+        ballSpeedY = -ballSpeedY;
+      }
+
+      // Ball hitting paddles
+      if (ballX <= 20 && ballY + ballSize >= playerY && ballY <= playerY + paddleHeight) {
+        ballSpeedX = -ballSpeedX;
+        playerScore++;
+      } else if (ballX + ballSize >= canvas.width - 20 && ballY + ballSize >= aiY && ballY <= aiY + paddleHeight) {
+        ballSpeedX = -ballSpeedX;
+        aiScore++;
+      }
+
+      // Ball going off screen
+      if (ballX <= 0) {
+        aiScore++;
+        resetBall();
+      } else if (ballX + ballSize >= canvas.width) {
+        playerScore++;
+        resetBall();
+      }
+    }
+
+    // Reset ball position after scoring
+    function resetBall() {
+      ballX = canvas.width / 2;
+      ballY = canvas.height / 2;
+      ballSpeedX = -ballSpeedX;
+      ballSpeedY = Math.random() > 0.5 ? 4 : -4;
+    }
+
+    // Update AI paddle movement
+    function updateAI() {
+      const aiCenter = aiY + paddleHeight / 2;
+      const ballCenter = ballY + ballSize / 2;
+
+      if (aiCenter < ballCenter - 35) {
+        aiY += paddleSpeed;
+      } else if (aiCenter > ballCenter + 35) {
+        aiY -= paddleSpeed;
+      }
+    }
+
+    // Update player paddle movement
+    function updatePlayer() {
+      if (upPressed && playerY > 0) {
+        playerY -= paddleSpeed;
+      } else if (downPressed && playerY + paddleHeight < canvas.height) {
+        playerY += paddleSpeed;
+      }
+    }
+
+    // Game loop
+    function gameLoop() {
+      updateBall();
+      updateAI();
+      updatePlayer();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Handle keypress events for player movement
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') upPressed = true;
+      if (e.key === 'ArrowDown') downPressed = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowUp') upPressed = false;
+      if (e.key === 'ArrowDown') downPressed = false;
+    });
+
+    // Start the game
+    gameLoop();
+  </script>
+</body>
+</html>

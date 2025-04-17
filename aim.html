@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aim Trainer - GameBox</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #1c1c1c;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 20px 0 10px;
+    }
+
+    #timer, #scoreDisplay {
+      font-size: 18px;
+      margin: 5px;
+    }
+
+    canvas {
+      background: #fefefe;
+      border: 2px solid #444;
+      margin: 20px 0;
+    }
+
+    .back-btn {
+      background: #444;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: #222;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Aim Trainer</h1>
+  <div id="timer">Time: 30</div>
+  <div id="scoreDisplay">Score: 0</div>
+  <canvas id="aimCanvas" width="800" height="400"></canvas>
+  <button class="back-btn" onclick="window.location.href='../index.html'">⬅ Back to GameBox</button>
+
+  <script>
+    const canvas = document.getElementById('aimCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const timerDisplay = document.getElementById('timer');
+
+    let score = 0;
+    let timeLeft = 30;
+    let circle = spawnCircle();
+
+    function spawnCircle() {
+      const radius = 30;
+      return {
+        x: Math.random() * (canvas.width - 2 * radius) + radius,
+        y: Math.random() * (canvas.height - 2 * radius) + radius,
+        radius: radius
+      };
+    }
+
+    function drawCircle(c) {
+      ctx.fillStyle = 'red';
+      ctx.beginPath();
+      ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function updateCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawCircle(circle);
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      const dist = Math.sqrt((mouseX - circle.x)**2 + (mouseY - circle.y)**2);
+      if (dist < circle.radius) {
+        score++;
+        scoreDisplay.textContent = "Score: " + score;
+        circle = spawnCircle();
+        updateCanvas();
+      }
+    });
+
+    function startGame() {
+      const timerInterval = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = "Time: " + timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = 'black';
+          ctx.font = '30px Arial';
+          ctx.fillText("Time's up! Final Score: " + score, 200, canvas.height / 2);
+        }
+      }, 1000);
+
+      updateCanvas();
+    }
+
+    startGame();
+  </script>
+</body>
+</html>

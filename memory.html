@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Memory Flip - GameBox</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #2e2e2e;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      margin: 20px 0;
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(4, 150px);
+      grid-gap: 10px;
+      margin-top: 30px;
+    }
+
+    .card {
+      width: 150px;
+      height: 150px;
+      background-color: #444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 30px;
+      color: transparent;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .flipped {
+      background-color: #f3a7a7;
+      color: black;
+    }
+
+    .back {
+      background-color: #444;
+    }
+
+    .back-btn {
+      margin-top: 20px;
+      background: #444;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: #222;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Memory Flip</h1>
+  <div id="message"></div>
+  <div class="card-container" id="cardContainer"></div>
+  <button class="back-btn" onclick="window.location.href='../index.html'">⬅ Back to GameBox</button>
+
+  <script>
+    const cardContainer = document.getElementById('cardContainer');
+    const message = document.getElementById('message');
+    const cardValues = ['🍎', '🍌', '🍒', '🍍', '🍓', '🍊', '🍉', '🍑', '🍎', '🍌', '🍒', '🍍', '🍓', '🍊', '🍉', '🍑'];
+    let flippedCards = [];
+    let matchedCards = [];
+    let moves = 0;
+
+    // Shuffle the card values array
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Create the game board with randomized cards
+    function createBoard() {
+      shuffle(cardValues);
+
+      cardValues.forEach((value, index) => {
+        const card = document.createElement('div');
+        card.classList.add('card', 'back');
+        card.dataset.value = value;
+        card.addEventListener('click', () => flipCard(card));
+        cardContainer.appendChild(card);
+      });
+    }
+
+    // Flip the card
+    function flipCard(card) {
+      if (flippedCards.length < 2 && !card.classList.contains('flipped')) {
+        card.classList.add('flipped');
+        card.textContent = card.dataset.value;
+        flippedCards.push(card);
+
+        if (flippedCards.length === 2) {
+          moves++;
+          checkMatch();
+        }
+      }
+    }
+
+    // Check if the two flipped cards match
+    function checkMatch() {
+      if (flippedCards[0].dataset.value === flippedCards[1].dataset.value) {
+        matchedCards.push(flippedCards[0], flippedCards[1]);
+        flippedCards = [];
+        updateMessage();
+
+        if (matchedCards.length === cardValues.length) {
+          setTimeout(() => {
+            message.textContent = `Congratulations! You completed the game in ${moves} moves.`;
+          }, 500);
+        }
+      } else {
+        setTimeout(() => {
+          flippedCards[0].classList.remove('flipped');
+          flippedCards[1].classList.remove('flipped');
+          flippedCards[0].textContent = '';
+          flippedCards[1].textContent = '';
+          flippedCards = [];
+        }, 1000);
+      }
+    }
+
+    // Update the message
+    function updateMessage() {
+      message.textContent = `Moves: ${moves}`;
+    }
+
+    createBoard();
+  </script>
+
+</body>
+</html>

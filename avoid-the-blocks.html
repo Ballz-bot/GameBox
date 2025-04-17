@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Avoid the Blocks - GameBox</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #111;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #gameCanvas {
+      border: 2px solid #fff;
+      background-color: #222;
+    }
+
+    .back-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: #222;
+    }
+
+    #score {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Avoid the Blocks</h1>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <div id="score">Score: 0</div>
+  <button class="back-btn" onclick="location.href='../index.html'">⬅ Back to GameBox</button>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const playerWidth = 50;
+    const playerHeight = 50;
+    const blockWidth = 50;
+    const blockHeight = 50;
+    const gravity = 0.3;
+
+    let playerX = canvas.width / 2 - playerWidth / 2;
+    let playerY = canvas.height - playerHeight - 20;
+    let playerSpeed = 5;
+    let playerDx = 0;
+    let blocks = [];
+    let score = 0;
+    let gameOver = false;
+
+    const keys = {
+      left: false,
+      right: false,
+    };
+
+    // Create a block falling down
+    function createBlock() {
+      let x = Math.random() * (canvas.width - blockWidth);
+      blocks.push({ x, y: -blockHeight, speed: Math.random() * 2 + 2 });
+    }
+
+    // Draw player
+    function drawPlayer() {
+      ctx.fillStyle = 'lime';
+      ctx.fillRect(playerX, playerY, playerWidth, playerHeight);
+    }
+
+    // Draw blocks
+    function drawBlocks() {
+      ctx.fillStyle = 'red';
+      for (const block of blocks) {
+        ctx.fillRect(block.x, block.y, blockWidth, blockHeight);
+      }
+    }
+
+    // Update player position
+    function updatePlayer() {
+      if (keys.left && playerX > 0) {
+        playerX -= playerSpeed;
+      } else if (keys.right && playerX < canvas.width - playerWidth) {
+        playerX += playerSpeed;
+      }
+    }
+
+    // Update block positions
+    function updateBlocks() {
+      for (let i = blocks.length - 1; i >= 0; i--) {
+        let block = blocks[i];
+        block.y += block.speed;
+        if (block.y > canvas.height) {
+          blocks.splice(i, 1);
+          score++;
+        }
+
+        // Check collision with player
+        if (
+          block.x < playerX + playerWidth &&
+          block.x + blockWidth > playerX &&
+          block.y < playerY + playerHeight &&
+          block.y + blockHeight > playerY
+        ) {
+          gameOver = true;
+          break;
+        }
+      }
+    }
+
+    // Draw score
+    function drawScore() {
+      ctx.font = '24px Arial';
+      ctx.fillStyle = 'white';
+      ctx.fillText(`Score: ${score}`, 20, 40);
+    }
+
+    // Game over
+    function gameOverScreen() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'white';
+      ctx.font = '30px Arial';
+      ctx.fillText('Game Over!', canvas.width / 2 - 90, canvas.height / 2);
+      ctx.font = '20px Arial';
+      ctx.fillText(`Final Score: ${score}`, canvas.width / 2 - 80, canvas.height / 2 + 40);
+    }
+
+    // Game loop
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (gameOver) {
+        gameOverScreen();
+        return;
+      }
+
+      updatePlayer();
+      updateBlocks();
+      drawPlayer();
+      drawBlocks();
+      drawScore();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Handle keydown and keyup events
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') keys.left = true;
+      if (e.key === 'ArrowRight') keys.right = true;
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'ArrowLeft') keys.left = false;
+      if (e.key === 'ArrowRight') keys.right = false;
+    });
+
+    // Start the game
+    function startGame() {
+      setInterval(createBlock, 1500); // Create a new block every 1.5 seconds
+      gameLoop();
+    }
+
+    startGame();
+  </script>
+</body>
+</html>

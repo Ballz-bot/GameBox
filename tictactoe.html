@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tic Tac Toe - GameBox</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 5px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #222;
+      border: 2px solid #444;
+      font-size: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .cell:hover {
+      background-color: #333;
+    }
+
+    .message {
+      margin-top: 20px;
+      font-size: 24px;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic Tac Toe (vs AI)</h1>
+  <div class="board" id="board"></div>
+  <div class="message" id="message"></div>
+  <button onclick="restartGame()">Restart</button>
+  <button onclick="location.href='index.html'">⬅ Back to GameBox</button>
+
+  <script>
+    const board = document.getElementById('board');
+    const message = document.getElementById('message');
+    let cells = [];
+    let gameOver = false;
+  
+    function startGame() {
+      board.innerHTML = '';
+      gameOver = false;
+      message.textContent = '';
+      cells = Array(9).fill('');
+  
+      for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.index = i;
+        cell.addEventListener('click', () => handlePlayerMove(i));
+        board.appendChild(cell);
+      }
+    }
+  
+    function handlePlayerMove(index) {
+      if (cells[index] === '' && !gameOver) {
+        cells[index] = 'X';
+        updateBoard();
+        if (!checkGameOver()) {
+          setTimeout(handleAIMove, 300);
+        }
+      }
+    }
+  
+    function handleAIMove() {
+      if (gameOver) return;
+  
+      const bestMove = getSmartMove();
+      if (bestMove !== null) {
+        cells[bestMove] = 'O';
+        updateBoard();
+        checkGameOver();
+      }
+    }
+  
+    function getSmartMove() {
+      const empty = cells
+        .map((val, idx) => (val === '' ? idx : null))
+        .filter(v => v !== null);
+  
+      // Winning combos
+      const wins = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+  
+      // 1. Try to win
+      for (let [a, b, c] of wins) {
+        const line = [cells[a], cells[b], cells[c]];
+        if (line.filter(v => v === 'O').length === 2 && line.includes('')) {
+          const move = [a, b, c][line.indexOf('')];
+          return move;
+        }
+      }
+  
+      // 2. Block the player
+      for (let [a, b, c] of wins) {
+        const line = [cells[a], cells[b], cells[c]];
+        if (line.filter(v => v === 'X').length === 2 && line.includes('')) {
+          const move = [a, b, c][line.indexOf('')];
+          return move;
+        }
+      }
+  
+      // 3. Pick center if available
+      if (cells[4] === '') return 4;
+  
+      // 4. Pick random move
+      if (empty.length > 0) {
+        return empty[Math.floor(Math.random() * empty.length)];
+      }
+  
+      return null;
+    }
+  
+    function updateBoard() {
+      const cellElements = document.querySelectorAll('.cell');
+      cells.forEach((value, index) => {
+        cellElements[index].textContent = value;
+      });
+    }
+  
+    function checkGameOver() {
+      const wins = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+  
+      for (let [a, b, c] of wins) {
+        if (cells[a] && cells[a] === cells[b] && cells[b] === cells[c]) {
+          gameOver = true;
+          message.textContent = `${cells[a]} wins!`;
+          return true;
+        }
+      }
+  
+      if (!cells.includes('')) {
+        gameOver = true;
+        message.textContent = "It's a tie!";
+        return true;
+      }
+  
+      return false;
+    }
+  
+    function restartGame() {
+      startGame();
+    }
+  
+    startGame();
+  </script>
+  
+</body>
+</html>

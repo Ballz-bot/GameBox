@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tetris - GameBox</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #111;
+      color: white;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #gameCanvas {
+      border: 2px solid white;
+      background-color: #222;
+    }
+
+    .back-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .back-btn:hover {
+      background: #222;
+    }
+
+    .menu-btn {
+      padding: 10px 20px;
+      margin: 10px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .menu-btn:hover {
+      background: #222;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #score {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="menu" id="menu">
+    <h1>Tetris</h1>
+    <button class="menu-btn" onclick="startGame()">Start Game</button>
+  </div>
+
+  <canvas id="gameCanvas" width="300" height="600" style="display: none;"></canvas>
+  <div id="score" style="display: none;">Score: 0</div>
+  <button class="back-btn" onclick="location.href='../index.html'">⬅ Back to GameBox</button>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const rows = 20;
+    const cols = 10;
+    const blockSize = 30;
+    let board = Array.from(Array(rows), () => Array(cols).fill(0));
+    let currentPiece;
+    let score = 0;
+
+    // Define the shapes
+    const shapes = [
+      [[1, 1, 1, 1]], // I shape
+      [[1, 1], [1, 1]], // O shape
+      [[0, 1, 0], [1, 1, 1]], // T shape
+      [[1, 0, 0], [1, 1, 1]], // L shape
+      [[0, 0, 1], [1, 1, 1]], // J shape
+      [[1, 1, 0], [0, 1, 1]], // S shape
+      [[0, 1, 1], [1, 1, 0]]  // Z shape
+    ];
+
+    function createPiece() {
+      const shape = shapes[Math.floor(Math.random() * shapes.length)];
+      return { shape, x: Math.floor(cols / 2) - Math.floor(shape[0].length / 2), y: 0 };
+    }
+
+    function drawBlock(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+      ctx.strokeStyle = '#000';
+      ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
+    }
+
+    function drawBoard() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          if (board[y][x]) {
+            drawBlock(x, y, '#0095DD');
+          }
+        }
+      }
+    }
+
+    function drawPiece() {
+      for (let y = 0; y < currentPiece.shape.length; y++) {
+        for (let x = 0; x < currentPiece.shape[y].length; x++) {
+          if (currentPiece.shape[y][x]) {
+            drawBlock(currentPiece.x + x, currentPiece.y + y, '#ff6347');
+          }
+        }
+      }
+    }
+
+    function isPieceAtPosition(x, y, piece) {
+      for (let i = 0; i < piece.shape.length; i++) {
+        for (let j = 0; j < piece.shape[i].length; j++) {
+          if (piece.shape[i][j]) {
+            if (y + i >= rows || x + j < 0 || x + j >= cols || board[y + i][x + j]) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    function placePiece() {
+      for (let y = 0; y < currentPiece.shape.length; y++) {
+        for (let x = 0; x < currentPiece.shape[y].length; x++) {
+          if (currentPiece.shape[y][x]) {
+            board[currentPiece.y + y][currentPiece.x + x] = 1;
+          }
+        }
+      }
+      clearFullLines();
+      currentPiece = createPiece();
+      if (isPieceAtPosition(currentPiece.x, currentPiece.y, currentPiece)) {
+        gameOver();
+      }
+    }
+
+    function clearFullLines() {
+      for (let y = rows - 1; y >= 0; y--) {
+        if (board[y].every(cell => cell === 1)) {
+          board.splice(y, 1);
+          board.unshift(Array(cols).fill(0));
+          score += 100;
+          document.getElementById('score').textContent = `Score: ${score}`;
+        }
+      }
+    }
+
+    function gameOver() {
+      alert('Game Over!');
+      board = Array.from(Array(rows), () => Array(cols).fill(0));
+      score = 0;
+      document.getElementById('score').textContent = `Score: ${score}`;
+    }
+
+    function movePieceDown() {
+      if (!isPieceAtPosition(currentPiece.x, currentPiece.y + 1, currentPiece)) {
+        currentPiece.y++;
+      } else {
+        placePiece();
+      }
+    }
+
+    function movePieceLeft() {
+      if (!isPieceAtPosition(currentPiece.x - 1, currentPiece.y, currentPiece)) {
+        currentPiece.x--;
+      }
+    }
+
+    function movePieceRight() {
+      if (!isPieceAtPosition(currentPiece.x + 1, currentPiece.y, currentPiece)) {
+        currentPiece.x++;
+      }
+    }
+
+    function rotatePiece() {
+      const rotated = {
+        shape: currentPiece.shape[0].map((_, index) =>
+          currentPiece.shape.map(row => row[index])
+        ).reverse(),
+        x: currentPiece.x,
+        y: currentPiece.y
+      };
+      if (!isPieceAtPosition(rotated.x, rotated.y, rotated)) {
+        currentPiece.shape = rotated.shape;
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        movePieceLeft();
+      } else if (e.key === 'ArrowRight') {
+        movePieceRight();
+      } else if (e.key === 'ArrowDown') {
+        movePieceDown();
+      } else if (e.key === 'ArrowUp') {
+        rotatePiece();
+      }
+    });
+
+    function draw() {
+      drawBoard();
+      drawPiece();
+    }
+
+    function gameLoop() {
+      movePieceDown();
+      draw();
+      setTimeout(gameLoop, 500);
+    }
+
+    function startGame() {
+      document.getElementById('menu').style.display = 'none';
+      document.getElementById('gameCanvas').style.display = 'block';
+      document.getElementById('score').style.display = 'block';
+      currentPiece = createPiece();
+      gameLoop();
+    }
+  </script>
+</body>
+</html>
